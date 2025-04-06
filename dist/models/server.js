@@ -13,24 +13,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const connection_1 = __importDefault(require("../database/connection"));
+const user_1 = __importDefault(require("../routes/user"));
+const products_1 = __importDefault(require("../routes/products"));
+const user_2 = require("../models/user");
+const products_2 = require("../models/products");
 class Server {
     constructor() {
         console.log('Server is running in ');
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || '3017';
         this.listen();
+        this.midlewares();
         this.dbConnection();
+        this.router();
     }
     listen() {
         this.app.listen(this.port, () => {
             console.log(`Server is running on port ${this.port}`);
         });
     }
+    router() {
+        this.app.use(user_1.default);
+        this.app.use(products_1.default);
+    }
+    midlewares() {
+        this.app.use(express_1.default.json()); // para utilizar para encapsular funiones y reutilizar en distitas clases 
+    }
     dbConnection() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield connection_1.default.authenticate();
+                //await sequelize.authenticate();
+                yield user_2.User.sync({ force: true }); // sincroniza la base de datos con el modelo
+                yield products_2.Product.sync({ force: true }); // sincroniza la base de datos con el modelo
                 console.log('Database connection has been established successfully.');
             }
             catch (error) {
