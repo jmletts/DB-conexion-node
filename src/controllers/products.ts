@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import {User} from '../models/user';
 import { Product } from '../models/products';
 
 
@@ -8,7 +6,7 @@ export const registerProduct = async (req: Request, res : Response) => {
 
     const { name, description} = req.body;
 
-    User.create({
+    Product.create({
         name: name,
         description: description,
         status: 1
@@ -19,4 +17,9 @@ export const registerProduct = async (req: Request, res : Response) => {
         name,
         description,
     })
+}
+
+export const getProducts = async (req: Request, res: Response) => {
+    const listaProducto = await Product.findAll();
+    res.json({listaProducto})
 }

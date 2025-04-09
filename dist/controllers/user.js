@@ -16,6 +16,7 @@ exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = require("../models/user");
 const sequelize_1 = require("sequelize");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, lastName, email, password, credential } = req.body; //creamos las vriabesl del tipo json
@@ -44,12 +45,26 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.register = register;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        console.log(req.body);
-        res.json({ msg: 'Login Successfully', body: req.body });
+    const { email, password } = req.body;
+    const user = yield user_1.User.findOne({
+        where: { email: email.trim() },
+    });
+    if (!user) {
+        res.status(400).json({ msg: 'Email no existe', user });
+        return;
     }
-    catch (error) {
-        res.status(500).json({ msg: 'Error during login', error });
+    const passwordValid = yield bcrypt_1.default.compare(password, user.password);
+    if (!passwordValid) {
+        res.status(400).json({ msg: 'passwordno correcta', user });
+        return;
     }
+    const token = jsonwebtoken_1.default.sign({ email: email }, process.env.SECRET_KEY || 'Jdzkfjdkjfk', { expiresIn: '1h' });
+    res.json({ token });
+    //try {
+    //  console.log(req.body);
+    //  res.json({ msg: 'Login Successfully', body: req.body });
+    //} catch (error) {
+    //   res.status(500).json({ msg: 'Error during login', error });
+    //}
 });
 exports.login = login;

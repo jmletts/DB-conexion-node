@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerProduct = void 0;
-const user_1 = require("../models/user");
+exports.getProducts = exports.registerProduct = void 0;
+const products_1 = require("../models/products");
 const registerProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, description } = req.body;
-    user_1.User.create({
+    products_1.Product.create({
         name: name,
         description: description,
         status: 1
@@ -25,3 +25,8 @@ const registerProduct = (req, res) => __awaiter(void 0, void 0, void 0, function
     });
 });
 exports.registerProduct = registerProduct;
+const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const listaProducto = yield products_1.Product.findAll();
+    res.json({ listaProducto });
+});
+exports.getProducts = getProducts;
