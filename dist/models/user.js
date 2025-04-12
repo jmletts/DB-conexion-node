@@ -29,11 +29,6 @@ exports.User = connection_1.default.define('user', {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false // que no sera nulo
     },
-    credential: {
-        type: sequelize_1.DataTypes.STRING,
-        allowNull: false,
-        unique: true // que no sera nulo
-    },
     status: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false // que no sera nulo

@@ -17,6 +17,7 @@ const user_1 = __importDefault(require("../routes/user"));
 const products_1 = __importDefault(require("../routes/products"));
 const user_2 = require("../models/user");
 const products_2 = require("../models/products");
+const cors_1 = __importDefault(require("cors"));
 class Server {
     constructor() {
         console.log('Server is running in ');
@@ -38,13 +39,14 @@ class Server {
     }
     midlewares() {
         this.app.use(express_1.default.json()); // para utilizar para encapsular funiones y reutilizar en distitas clases 
+        this.app.use((0, cors_1.default)()); // para permitir el acceso a la api desde cualquier origen
     }
     dbConnection() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //await sequelize.authenticate();
-                yield user_2.User.sync({ force: true }); // sincroniza la base de datos con el modelo
-                yield products_2.Product.sync({ force: true }); // sincroniza la base de datos con el modelo
+                //await sequelize.authenticate(); 
+                yield user_2.User.sync({ alter: true }); // sincroniza la base de datos con el modelo
+                yield products_2.Product.sync({ alter: true }); // sincroniza la base de datos con el modelo
                 console.log('Database connection has been established successfully.');
             }
             catch (error) {

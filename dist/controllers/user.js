@@ -19,10 +19,10 @@ const sequelize_1 = require("sequelize");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, lastName, email, password, credential } = req.body; //creamos las vriabesl del tipo json
+        const { name, lastName, email, password } = req.body; //creamos las vriabesl del tipo json
         //validaciones
         const userUnique = yield user_1.User.findOne({
-            where: { [sequelize_1.Op.or]: [{ email: email }, { credential: credential }] }, //usamor op para validar ambos tanto encrdencia como email
+            where: { [sequelize_1.Op.or]: [{ email: email }] }, //usamor op para validar ambos tanto encrdencia como email
         });
         if (userUnique) { //si lafuncion anterior se cumple entinces e ejcuta esta condiconal que para el prcedieminto
             res.status(400).json({ msg: 'User already exists', userUnique });
@@ -34,13 +34,13 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             lastName,
             email,
             password: passwordHash,
-            credential,
             status: 1,
         });
-        res.json({ msg: 'User created successfully', name, lastName, email, credential }); // devuekve la confiamr dela andido
+        res.json({ msg: 'User created successfully', name, lastName, email }); // devuekve la confiamr dela andido
     }
     catch (error) {
         res.status(500).json({ msg: 'Error creating user', error });
+        console.log(req.body);
     }
 });
 exports.register = register;

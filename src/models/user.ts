@@ -26,11 +26,6 @@ export const User = sequelize.define(
             type: DataTypes.STRING,
             allowNull: false // que no sera nulo
         },
-        credential: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true // que no sera nulo
-        },
         status: {
             type: DataTypes.INTEGER,
             allowNull: false // que no sera nulo

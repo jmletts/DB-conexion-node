@@ -6,11 +6,11 @@ import jwt from 'jsonwebtoken';
 
 export const register = async (req: Request, res: Response): Promise<void> => { // creamos una funcion assync con prmses y definimos dos variables de tupojson de respuest y request
     try {
-        const { name, lastName, email, password, credential } = req.body; //creamos las vriabesl del tipo json
+        const { name, lastName, email, password} = req.body; //creamos las vriabesl del tipo json
 
         //validaciones
         const userUnique = await User.findOne({ // funcion para verificar el usuairo unico
-            where: { [Op.or]: [{ email : email}, { credential : credential}]}, //usamor op para validar ambos tanto encrdencia como email
+            where: { [Op.or]: [{ email : email}]}, //usamor op para validar ambos tanto encrdencia como email
         });
 
         if (userUnique) { //si lafuncion anterior se cumple entinces e ejcuta esta condiconal que para el prcedieminto
@@ -25,13 +25,14 @@ export const register = async (req: Request, res: Response): Promise<void> => { 
             lastName,
             email,
             password: passwordHash,
-            credential,
             status: 1,
         });
 
-        res.json({ msg: 'User created successfully', name, lastName, email, credential }); // devuekve la confiamr dela andido
+        res.json({ msg: 'User created successfully', name, lastName, email }); // devuekve la confiamr dela andido
     } catch (error) {
-        res.status(500).json({ msg: 'Error creating user', error }); 
+        res.status(500).json({ msg: 'Error creating user', error}); 
+        console.log(req.body);
+        
     }
 };
 

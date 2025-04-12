@@ -4,6 +4,7 @@ import router from '../routes/user';
 import routerProducts from '../routes/products';
 import {User} from '../models/user';
 import {Product} from '../models/products';
+import cors from 'cors';
 
 class Server {
     private app : Application;
@@ -31,13 +32,14 @@ class Server {
 
     midlewares() {
         this.app.use(express.json()); // para utilizar para encapsular funiones y reutilizar en distitas clases 
+        this.app.use(cors()); // para permitir el acceso a la api desde cualquier origen
     }
 
     async dbConnection() { // que es asynds
         try {
-            //await sequelize.authenticate();
-            await User.sync({ force: true }); // sincroniza la base de datos con el modelo
-            await Product.sync({ force: true }); // sincroniza la base de datos con el modelo
+            //await sequelize.authenticate(); 
+            await User.sync({ alter: true }); // sincroniza la base de datos con el modelo
+            await Product.sync({ alter: true }); // sincroniza la base de datos con el modelo
             console.log('Database connection has been established successfully.');
         } catch (error) {
             console.log('Unable to connect to the database:', error);
