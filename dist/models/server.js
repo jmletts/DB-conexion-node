@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13,48 +46,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const user_1 = __importDefault(require("../routes/user"));
 const products_1 = __importDefault(require("../routes/products"));
-const user_2 = require("../models/user");
-const products_2 = require("../models/products");
-const cors_1 = __importDefault(require("cors"));
+const models = __importStar(require("../models"));
 class Server {
     constructor() {
-        console.log('Server is running in ');
         this.app = (0, express_1.default)();
         this.port = process.env.PORT || '3017';
-        this.listen();
-        this.midlewares();
+        this.middlewares();
+        this.routes();
         this.dbConnection();
-        this.router();
+        this.listen();
     }
     listen() {
         this.app.listen(this.port, () => {
             console.log(`Server is running on port ${this.port}`);
         });
     }
-    router() {
+    middlewares() {
+        this.app.use(express_1.default.json());
+        this.app.use((0, cors_1.default)());
+        this.app.use((0, cookie_parser_1.default)());
+    }
+    routes() {
         this.app.use(user_1.default);
         this.app.use(products_1.default);
-    }
-    midlewares() {
-        this.app.use(express_1.default.json()); // para utilizar para encapsular funiones y reutilizar en distitas clases 
-        this.app.use((0, cors_1.default)()); // para permitir el acceso a la api desde cualquier origen
     }
     dbConnection() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //await sequelize.authenticate(); 
-                yield user_2.User.sync({ alter: true }); // sincroniza la base de datos con el modelo
-                yield products_2.Product.sync({ alter: true }); // sincroniza la base de datos con el modelo
-                console.log('Database connection has been established successfully.');
+                yield models.sequelize.authenticate();
+                console.log('Database connection established.');
+                yield models.sequelize.sync({ force: true }); // sincroniza todas las tablas
+                console.log('All models were synchronized successfully.');
             }
             catch (error) {
-                console.log('Unable to connect to the database:', error);
+                console.error('Unable to connect to the database:', error);
             }
         });
     }
 }
 exports.default = Server;
-// para referenciar en el index 
-// estrcutura de server y inicalizar un app con express

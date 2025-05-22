@@ -5,9 +5,7 @@ const sequelize = new sequelize_1.Sequelize('api-node', 'root', '11111111', {
     host: 'localhost',
     dialect: 'mysql',
     dialectOptions: {
-        options: {
-            allowPublicKeyRetrieval: true
-        }
+        allowPublicKeyRetrieval: true
     }
 });
 exports.default = sequelize;

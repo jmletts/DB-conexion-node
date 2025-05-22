@@ -1,10 +1,11 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../database/connection';
 
-export const Product = sequelize.define('Product', {
+export const Company = sequelize.define('Company', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT },
-    price: { type: DataTypes.DECIMAL(10, 2) },
-    Companyid: { type: DataTypes.INTEGER, allowNull: false }
+    logourl: { type: DataTypes.STRING },
+    industry: { type: DataTypes.STRING },
+    Userid: { type: DataTypes.INTEGER, allowNull: false }
 });

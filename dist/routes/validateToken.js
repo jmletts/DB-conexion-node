@@ -5,24 +5,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const validateToken = (req, res, next) => {
-    const headerToken = req.headers['authorization']; //obtenemos el token del header de la peticion
-    // console.log(headerToken);
-    if (headerToken != undefined && headerToken.startsWith('Bearer ')) {
-        try {
-            const token = headerToken.slice(7); //eliminamos el Bearer del token
-            jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY || "tseee");
-            next();
-        }
-        catch (error) {
-            res.status(401).json({
-                message: 'Token no valido'
-            });
-        }
+    const token = req.cookies.token;
+    if (!token) {
+        res.status(401).json({ message: "Acceso no autorizado: no hay token" });
+        return;
     }
-    else {
-        res.status(401).json({
-            message: 'Acceso no autorizado'
-        });
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.SECRET_KEY || "tseee");
+        req.user = decoded;
+        next();
+    }
+    catch (error) {
+        res.status(403).json({ message: "Token inválido o expirado" });
     }
 };
 exports.default = validateToken;

@@ -1,53 +1,53 @@
 import express, { Application } from 'express';
-import sequelize from '../database/connection';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import router from '../routes/user';
 import routerProducts from '../routes/products';
-import {User} from '../models/user';
-import {Product} from '../models/products';
-import cors from 'cors';
+import * as models from '../models';  
 
 class Server {
-    private app : Application;
+    private app: Application;
     private port: string;
+
     constructor() {
-        console.log('Server is running in ');
         this.app = express();
         this.port = process.env.PORT || '3017';
+
+        this.middlewares();
+        this.routes();
+        this.dbConnection();  
         this.listen();
-        this.midlewares();
-        this.dbConnection();
-        this.router();
     }
 
     listen() {
         this.app.listen(this.port, () => {
             console.log(`Server is running on port ${this.port}`);
-        })
+        });
     }
 
-    router(){
+    middlewares() {
+        this.app.use(express.json());
+        this.app.use(cors());
+        this.app.use(cookieParser());
+    }
+
+    routes() {
         this.app.use(router);
         this.app.use(routerProducts);
     }
 
-    midlewares() {
-        this.app.use(express.json()); // para utilizar para encapsular funiones y reutilizar en distitas clases 
-        this.app.use(cors()); // para permitir el acceso a la api desde cualquier origen
-    }
-
-    async dbConnection() { // que es asynds
+    async dbConnection() {
         try {
-            //await sequelize.authenticate(); 
-            await User.sync({ alter: true }); // sincroniza la base de datos con el modelo
-            await Product.sync({ alter: true }); // sincroniza la base de datos con el modelo
-            console.log('Database connection has been established successfully.');
+            await models.sequelize.authenticate();
+            console.log('Database connection established.');
+
+            await models.sequelize.sync({ force: true });  // sincroniza todas las tablas
+
+            console.log('All models were synchronized successfully.');
         } catch (error) {
-            console.log('Unable to connect to the database:', error);
-            
+            console.error('Unable to connect to the database:', error);
         }
     }
 }
 
 export default Server;
-// para referenciar en el index 
-// estrcutura de server y inicalizar un app con express

@@ -3,13 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Product = void 0;
+exports.Category = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../database/connection"));
-exports.Product = connection_1.default.define('Product', {
+exports.Category = connection_1.default.define('Category', {
     id: { type: sequelize_1.DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    name: { type: sequelize_1.DataTypes.STRING, allowNull: false },
-    description: { type: sequelize_1.DataTypes.TEXT },
-    price: { type: sequelize_1.DataTypes.DECIMAL(10, 2) },
-    Companyid: { type: sequelize_1.DataTypes.INTEGER, allowNull: false }
+    name: { type: sequelize_1.DataTypes.STRING, allowNull: false }
 });
