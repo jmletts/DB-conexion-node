@@ -3,33 +3,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Category = void 0;
+exports.CartItem = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../database/connection"));
-exports.Category = connection_1.default.define("Category", {
+exports.CartItem = connection_1.default.define("CartItem", {
     id: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    name: {
-        type: sequelize_1.DataTypes.STRING(100),
-        allowNull: false,
-        unique: true
-    },
-    description: {
-        type: sequelize_1.DataTypes.TEXT
-    },
-    parent_id: {
+    user_id: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: true
+        allowNull: false
     },
-    is_active: {
-        type: sequelize_1.DataTypes.BOOLEAN,
-        defaultValue: true
+    product_id: {
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: false
+    },
+    quantity: {
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1
     }
 }, {
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: false
+    createdAt: 'added_at',
+    updatedAt: false,
+    indexes: [
+        {
+            unique: true,
+            fields: ['user_id', 'product_id']
+        }
+    ]
 });

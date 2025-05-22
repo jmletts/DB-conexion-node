@@ -3,33 +3,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Category = void 0;
+exports.SystemConfig = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../database/connection"));
-exports.Category = connection_1.default.define("Category", {
+exports.SystemConfig = connection_1.default.define("SystemConfig", {
     id: {
         type: sequelize_1.DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    name: {
+    config_key: {
         type: sequelize_1.DataTypes.STRING(100),
-        allowNull: false,
-        unique: true
+        unique: true,
+        allowNull: false
+    },
+    config_value: {
+        type: sequelize_1.DataTypes.TEXT
     },
     description: {
         type: sequelize_1.DataTypes.TEXT
-    },
-    parent_id: {
-        type: sequelize_1.DataTypes.INTEGER,
-        allowNull: true
-    },
-    is_active: {
-        type: sequelize_1.DataTypes.BOOLEAN,
-        defaultValue: true
     }
 }, {
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: false
+    createdAt: false,
+    updatedAt: 'updated_at'
 });

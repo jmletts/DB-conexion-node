@@ -7,7 +7,8 @@ import jwt from "jsonwebtoken";
 export const register = async (req: Request, res: Response): Promise<void> => {
   // creamos una funcion assync con prmses y definimos dos variables de tupojson de respuest y request
   try {
-    const { name, lastName, email, password } = req.body; //creamos las vriabesl del tipo json
+    const { id, name, lastName, email, password, phone } = req.body;
+    //creamos las vriabesl del tipo json
 
     //validaciones
     const userUnique = await User.findOne({
@@ -23,16 +24,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const passwordHash = await bcrypt.hash(password, 10); // ecnripta la contrasena
 
-    await User.create({
+    const nUser = await User.create({
       // creaos el uaairo jsn y lo anadimoa a la db
       name,
       lastName,
       email,
       password: passwordHash,
-      status: 1,
+      phone,
+      status: "active",
     });
 
-    res.json({ msg: "User created successfully", name, lastName, email }); // devuekve la confiamr dela andido
+    res.json({ msg: "User created successfully", nUser }); // devuekve la confiamr dela andido
   } catch (error) {
     res.status(500).json({ msg: "Error creating user", error });
     console.log(req.body);
@@ -45,7 +47,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const user: any = await User.findOne({
     where: { email: email.trim() },
   });
-3
+  3;
   if (!user) {
     res.status(400).json({ msg: "Email no existe", user });
     return;

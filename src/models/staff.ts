@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database/connection";
 
-export const User = sequelize.define("User", {
+export const Staff = sequelize.define("Staff", {
   id: { 
     type: DataTypes.INTEGER, 
     primaryKey: true, 
@@ -11,14 +11,10 @@ export const User = sequelize.define("User", {
     type: DataTypes.STRING(100), 
     allowNull: false 
   },
-  lastName: { 
-    type: DataTypes.STRING(100), 
-    allowNull: false 
-  },
   email: { 
     type: DataTypes.STRING(150), 
-    allowNull: false, 
-    unique: true,
+    unique: true, 
+    allowNull: false,
     validate: {
       isEmail: true
     }
@@ -27,15 +23,25 @@ export const User = sequelize.define("User", {
     type: DataTypes.STRING(255), 
     allowNull: false 
   },
-  phone: { 
-    type: DataTypes.STRING(20) 
+  role: { 
+    type: DataTypes.ENUM('admin', 'manager', 'employee'), 
+    defaultValue: 'employee' 
   },
-  status: { 
-    type: DataTypes.ENUM('active', 'inactive', 'suspended'), 
-    defaultValue: 'active' 
+  department: { 
+    type: DataTypes.STRING(100) 
+  },
+  salary: { 
+    type: DataTypes.DECIMAL(10, 2) 
+  },
+  hire_date: { 
+    type: DataTypes.DATEONLY 
+  },
+  is_active: { 
+    type: DataTypes.BOOLEAN, 
+    defaultValue: true 
   }
 }, {
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  updatedAt: false
 });

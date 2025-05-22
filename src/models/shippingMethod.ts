@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database/connection";
 
-export const Category = sequelize.define("Category", {
+export const ShippingMethod = sequelize.define("ShippingMethod", {
   id: { 
     type: DataTypes.INTEGER, 
     primaryKey: true, 
@@ -9,17 +9,23 @@ export const Category = sequelize.define("Category", {
   },
   name: { 
     type: DataTypes.STRING(100), 
-    allowNull: false, 
-    unique: true 
+    allowNull: false 
   },
   description: { 
     type: DataTypes.TEXT 
   },
-  parent_id: { 
-    type: DataTypes.INTEGER,
-    allowNull: true 
+  base_cost: { 
+    type: DataTypes.DECIMAL(8, 2), 
+    allowNull: false 
   },
-  is_active: { 
+  cost_per_kg: { 
+    type: DataTypes.DECIMAL(8, 2), 
+    defaultValue: 0 
+  },
+  estimated_days: { 
+    type: DataTypes.STRING(20) 
+  },
+  is_available: { 
     type: DataTypes.BOOLEAN, 
     defaultValue: true 
   }

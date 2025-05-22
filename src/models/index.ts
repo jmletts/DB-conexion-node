@@ -1,43 +1,166 @@
 import sequelize from '../database/connection';
 
+// Importar todos los modelos
 import { User } from './user';
-import { Company } from './company';
-import { Product } from './products';
+import { Address } from './address';
 import { Category } from './category';
-import { ProductCategory } from './productCategory';
+import { Product } from './product';
+import { ProductImage } from './productImage';
+import { PaymentMethod } from './paymentMethod';
+import { ShippingMethod } from './shippingMethod';
 import { Order } from './order';
-import { OrderProduct } from './orderProduct';
-import { Review } from './review';
+import { OrderItem } from './orderItem';
+import { CartItem } from './cartItem';
+import { Invoice } from './invoice';
+import { Staff } from './staff';
+import { SystemConfig } from './systemConfig';
 
-// Relaciones
-User.hasMany(Company, { foreignKey: 'Userid' });
-Company.belongsTo(User, { foreignKey: 'Userid' });
+// =============================================
+// DEFINIR RELACIONES
+// =============================================
 
-Company.hasMany(Product, { foreignKey: 'Companyid' });
-Product.belongsTo(Company, { foreignKey: 'Companyid' });
+// Relaciones de Usuario
+User.hasMany(Address, { 
+  foreignKey: 'user_id', 
+  as: 'addresses',
+  onDelete: 'CASCADE' 
+});
+Address.belongsTo(User, { 
+  foreignKey: 'user_id', 
+  as: 'user' 
+});
 
-Product.belongsToMany(Category, { through: ProductCategory, foreignKey: 'Productid' });
-Category.belongsToMany(Product, { through: ProductCategory, foreignKey: 'Categoryid' });
+User.hasMany(Order, { 
+  foreignKey: 'user_id', 
+  as: 'orders' 
+});
+Order.belongsTo(User, { 
+  foreignKey: 'user_id', 
+  as: 'customer' 
+});
 
-User.hasMany(Order, { foreignKey: 'Userid' });
-Order.belongsTo(User, { foreignKey: 'Userid' });
+User.hasMany(CartItem, { 
+  foreignKey: 'user_id', 
+  as: 'cartItems',
+  onDelete: 'CASCADE' 
+});
+CartItem.belongsTo(User, { 
+  foreignKey: 'user_id', 
+  as: 'user' 
+});
 
-Order.belongsToMany(Product, { through: OrderProduct, foreignKey: 'Orderid' });
-Product.belongsToMany(Order, { through: OrderProduct, foreignKey: 'Productid' });
+// Relaciones de Categoría (auto-referencial para subcategorías)
+Category.hasMany(Category, { 
+  foreignKey: 'parent_id', 
+  as: 'subcategories' 
+});
+Category.belongsTo(Category, { 
+  foreignKey: 'parent_id', 
+  as: 'parent' 
+});
 
-User.hasMany(Review, { foreignKey: 'Userid' });
-Product.hasMany(Review, { foreignKey: 'Productid' });
-Review.belongsTo(User, { foreignKey: 'Userid' });
-Review.belongsTo(Product, { foreignKey: 'Productid' });
+Category.hasMany(Product, { 
+  foreignKey: 'category_id', 
+  as: 'products' 
+});
+Product.belongsTo(Category, { 
+  foreignKey: 'category_id', 
+  as: 'category' 
+});
+
+// Relaciones de Producto
+Product.hasMany(ProductImage, { 
+  foreignKey: 'product_id', 
+  as: 'images',
+  onDelete: 'CASCADE' 
+});
+ProductImage.belongsTo(Product, { 
+  foreignKey: 'product_id', 
+  as: 'product' 
+});
+
+Product.hasMany(OrderItem, { 
+  foreignKey: 'product_id', 
+  as: 'orderItems' 
+});
+OrderItem.belongsTo(Product, { 
+  foreignKey: 'product_id', 
+  as: 'product' 
+});
+
+Product.hasMany(CartItem, { 
+  foreignKey: 'product_id', 
+  as: 'cartItems',
+  onDelete: 'CASCADE' 
+});
+CartItem.belongsTo(Product, { 
+  foreignKey: 'product_id', 
+  as: 'product' 
+});
+
+// Relaciones de Pedido
+Order.hasMany(OrderItem, { 
+  foreignKey: 'order_id', 
+  as: 'items',
+  onDelete: 'CASCADE' 
+});
+OrderItem.belongsTo(Order, { 
+  foreignKey: 'order_id', 
+  as: 'order' 
+});
+
+Order.belongsTo(PaymentMethod, { 
+  foreignKey: 'payment_method_id', 
+  as: 'paymentMethod' 
+});
+PaymentMethod.hasMany(Order, { 
+  foreignKey: 'payment_method_id', 
+  as: 'orders' 
+});
+
+Order.belongsTo(ShippingMethod, { 
+  foreignKey: 'shipping_method_id', 
+  as: 'shippingMethod' 
+});
+ShippingMethod.hasMany(Order, { 
+  foreignKey: 'shipping_method_id', 
+  as: 'orders' 
+});
+
+// Relaciones de direcciones en pedidos
+Order.belongsTo(Address, { 
+  foreignKey: 'shipping_address_id', 
+  as: 'shippingAddress' 
+});
+Order.belongsTo(Address, { 
+  foreignKey: 'billing_address_id', 
+  as: 'billingAddress' 
+});
+
+// Relación de Factura
+Order.hasOne(Invoice, { 
+  foreignKey: 'order_id', 
+  as: 'invoice' 
+});
+Invoice.belongsTo(Order, { 
+  foreignKey: 'order_id', 
+  as: 'order' 
+});
+
 
 export {
   sequelize,
   User,
-  Company,
-  Product,
+  Address,
   Category,
-  ProductCategory,
+  Product,
+  ProductImage,
+  PaymentMethod,
+  ShippingMethod,
   Order,
-  OrderProduct,
-  Review
+  OrderItem,
+  CartItem,
+  Invoice,
+  Staff,
+  SystemConfig
 };

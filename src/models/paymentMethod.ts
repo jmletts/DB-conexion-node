@@ -1,27 +1,27 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database/connection";
 
-export const Category = sequelize.define("Category", {
+export const PaymentMethod = sequelize.define("PaymentMethod", {
   id: { 
     type: DataTypes.INTEGER, 
     primaryKey: true, 
     autoIncrement: true 
   },
   name: { 
-    type: DataTypes.STRING(100), 
+    type: DataTypes.STRING(50), 
     allowNull: false, 
     unique: true 
   },
-  description: { 
-    type: DataTypes.TEXT 
+  provider: { 
+    type: DataTypes.STRING(50) 
   },
-  parent_id: { 
-    type: DataTypes.INTEGER,
-    allowNull: true 
-  },
-  is_active: { 
+  is_enabled: { 
     type: DataTypes.BOOLEAN, 
     defaultValue: true 
+  },
+  processing_fee: { 
+    type: DataTypes.DECIMAL(5, 4), 
+    defaultValue: 0 
   }
 }, {
   timestamps: true,

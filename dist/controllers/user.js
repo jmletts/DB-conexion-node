@@ -20,7 +20,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // creamos una funcion assync con prmses y definimos dos variables de tupojson de respuest y request
     try {
-        const { name, lastName, email, password } = req.body; //creamos las vriabesl del tipo json
+        const { id, name, lastName, email, password, phone } = req.body;
+        //creamos las vriabesl del tipo json
         //validaciones
         const userUnique = yield user_1.User.findOne({
             // funcion para verificar el usuairo unico
@@ -32,15 +33,16 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return;
         }
         const passwordHash = yield bcrypt_1.default.hash(password, 10); // ecnripta la contrasena
-        yield user_1.User.create({
+        const nUser = yield user_1.User.create({
             // creaos el uaairo jsn y lo anadimoa a la db
             name,
             lastName,
             email,
             password: passwordHash,
-            status: 1,
+            phone,
+            status: "active",
         });
-        res.json({ msg: "User created successfully", name, lastName, email }); // devuekve la confiamr dela andido
+        res.json({ msg: "User created successfully", nUser }); // devuekve la confiamr dela andido
     }
     catch (error) {
         res.status(500).json({ msg: "Error creating user", error });
