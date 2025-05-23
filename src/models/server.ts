@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import router from '../routes/user';
 import routerProducts from '../routes/products';
+import routerCompany from '../routes/company'; // 👈 Agregar esta línea
 import * as models from '../models';  
 
 class Server {
@@ -33,6 +34,7 @@ class Server {
     routes() {
         this.app.use(router);
         this.app.use(routerProducts);
+        this.app.use(routerCompany); 
     }
 
    async dbConnection() {
@@ -69,9 +71,6 @@ class Server {
             process.exit(1);
         }
     }
-
-
 }
 
 export default Server;
- 

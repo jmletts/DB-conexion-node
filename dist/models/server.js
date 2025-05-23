@@ -50,6 +50,7 @@ const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const user_1 = __importDefault(require("../routes/user"));
 const products_1 = __importDefault(require("../routes/products"));
+const company_1 = __importDefault(require("../routes/company")); // 👈 Agregar esta línea
 const models = __importStar(require("../models"));
 class Server {
     constructor() {
@@ -73,6 +74,7 @@ class Server {
     routes() {
         this.app.use(user_1.default);
         this.app.use(products_1.default);
+        this.app.use(company_1.default);
     }
     dbConnection() {
         return __awaiter(this, void 0, void 0, function* () {

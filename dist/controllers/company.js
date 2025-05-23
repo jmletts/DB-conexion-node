@@ -8,25 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateMyCompany = exports.getMyCompany = exports.checkCompanyExists = exports.desactivateMyCompany = exports.addCompany = void 0;
 const sequelize_1 = require("sequelize");
 const models_1 = require("../models");
 // Crear empresa
 const addCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const { user_id, name, description, address, phone, email, website, tax_id, } = req.body;
+        const { name, description, address, phone, email, website, tax_id, } = req.body;
+        // Obtener user_id del token JWT
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         // Validaciones básicas
         if (!user_id || !name) {
             res.status(400).json({
@@ -90,8 +82,9 @@ const addCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.addCompany = addCompany;
 // Desactivar empresa (soft delete)
 const desactivateMyCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const { user_id } = req.body;
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!user_id) {
             res.status(401).json({ msg: "Usuario no autenticado" });
             return;
@@ -116,8 +109,9 @@ const desactivateMyCompany = (req, res) => __awaiter(void 0, void 0, void 0, fun
 exports.desactivateMyCompany = desactivateMyCompany;
 // Verificar si el usuario tiene empresa
 const checkCompanyExists = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const { user_id } = req.body;
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!user_id) {
             res.status(401).json({ msg: "Usuario no autenticado" });
             return;
@@ -142,9 +136,9 @@ const checkCompanyExists = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.checkCompanyExists = checkCompanyExists;
 // Obtener empresa del usuario autenticado
 const getMyCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        // Asumiendo que el user_id viene del token JWT o sesión
-        const { user_id } = req.body; // O req.user.id si usas middleware de auth
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!user_id) {
             res.status(401).json({ msg: "Usuario no autenticado" });
             return;
@@ -183,9 +177,10 @@ const getMyCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.getMyCompany = getMyCompany;
 // Actualizar empresa del usuario
 const updateMyCompany = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        // Asumiendo que el user_id viene del token JWT o sesión
-        const _a = req.body, { user_id } = _a, updateData = __rest(_a, ["user_id"]);
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const updateData = req.body;
         if (!user_id) {
             res.status(401).json({ msg: "Usuario no autenticado" });
             return;

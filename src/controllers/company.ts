@@ -1,16 +1,21 @@
 import { Request, Response } from "express";
 import { Op } from "sequelize";
 import { Company, User, Product } from "../models";
+import { User as UserInterface } from "../interfaces/User";
+
+// Extender Request para incluir user
+interface AuthenticatedRequest extends Request {
+  user?: UserInterface;
+}
 
 // Crear empresa
 export const addCompany = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
     
   try {
     const {
-      user_id,
       name,
       description,
       address,
@@ -19,6 +24,9 @@ export const addCompany = async (
       website,
       tax_id,
     } = req.body;
+
+    // Obtener user_id del token JWT
+    const user_id = req.user?.id;
 
     // Validaciones básicas
     if (!user_id || !name) {
@@ -85,13 +93,14 @@ export const addCompany = async (
     });
   }
 };
+
 // Desactivar empresa (soft delete)
 export const desactivateMyCompany = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const { user_id } = req.body;
+    const user_id = req.user?.id;
 
     if (!user_id) {
       res.status(401).json({ msg: "Usuario no autenticado" });
@@ -120,11 +129,11 @@ export const desactivateMyCompany = async (
 
 // Verificar si el usuario tiene empresa
 export const checkCompanyExists = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const { user_id } = req.body;
+    const user_id = req.user?.id;
 
     if (!user_id) {
       res.status(401).json({ msg: "Usuario no autenticado" });
@@ -151,12 +160,11 @@ export const checkCompanyExists = async (
 
 // Obtener empresa del usuario autenticado
 export const getMyCompany = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    // Asumiendo que el user_id viene del token JWT o sesión
-    const { user_id } = req.body; // O req.user.id si usas middleware de auth
+    const user_id = req.user?.id;
 
     if (!user_id) {
       res.status(401).json({ msg: "Usuario no autenticado" });
@@ -198,12 +206,12 @@ export const getMyCompany = async (
 
 // Actualizar empresa del usuario
 export const updateMyCompany = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    // Asumiendo que el user_id viene del token JWT o sesión
-    const { user_id, ...updateData } = req.body;
+    const user_id = req.user?.id;
+    const updateData = req.body;
 
     if (!user_id) {
       res.status(401).json({ msg: "Usuario no autenticado" });
