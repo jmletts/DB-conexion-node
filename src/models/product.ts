@@ -7,6 +7,10 @@ export const Product = sequelize.define("Product", {
     primaryKey: true, 
     autoIncrement: true 
   },
+  company_id: { 
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
   name: { 
     type: DataTypes.STRING(200), 
     allowNull: false 
@@ -33,9 +37,6 @@ export const Product = sequelize.define("Product", {
     type: DataTypes.INTEGER, 
     defaultValue: 5 
   },
-  category_id: { 
-    type: DataTypes.INTEGER 
-  },
   brand: { 
     type: DataTypes.STRING(100) 
   },
@@ -50,6 +51,7 @@ export const Product = sequelize.define("Product", {
     defaultValue: true 
   }
 }, {
+  tableName: 'products',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at'

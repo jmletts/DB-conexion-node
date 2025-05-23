@@ -1,30 +1,34 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database/connection";
 
-export const PaymentMethod = sequelize.define("PaymentMethod", {
+export const OnepayService = sequelize.define("OnepayService", {
   id: { 
     type: DataTypes.INTEGER, 
     primaryKey: true, 
     autoIncrement: true 
   },
-  name: { 
-    type: DataTypes.STRING(50), 
-    allowNull: false, 
-    unique: true 
+  company_id: { 
+    type: DataTypes.INTEGER, 
+    unique: true,
+    allowNull: false
   },
-  provider: { 
-    type: DataTypes.STRING(50) 
-  },
-  is_enabled: { 
+  enabled: { 
     type: DataTypes.BOOLEAN, 
     defaultValue: true 
   },
-  processing_fee: { 
+  api_key: { 
+    type: DataTypes.STRING(255) 
+  },
+  webhook_url: { 
+    type: DataTypes.STRING(500) 
+  },
+  commission_rate: { 
     type: DataTypes.DECIMAL(5, 4), 
     defaultValue: 0 
   }
 }, {
+  tableName: 'onepay_services',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: false
+  updatedAt: 'updated_at'
 });

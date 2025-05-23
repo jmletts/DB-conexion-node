@@ -28,5 +28,6 @@ export const OrderItem = sequelize.define("OrderItem", {
     allowNull: false 
   }
 }, {
+  tableName: 'order_items',
   timestamps: false
 });

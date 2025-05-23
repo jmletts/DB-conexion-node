@@ -28,13 +28,22 @@ export const Invoice = sequelize.define("Invoice", {
     type: DataTypes.ENUM('pending', 'paid', 'overdue', 'cancelled'), 
     defaultValue: 'pending' 
   },
-  total_amount: { 
+  total: { 
     type: DataTypes.DECIMAL(10, 2), 
     allowNull: false 
   },
+  tax_amount: { 
+    type: DataTypes.DECIMAL(10, 2), 
+    defaultValue: 0 
+  },
   pdf_path: { 
     type: DataTypes.STRING(500) 
+  },
+  issued_at: { 
+    type: DataTypes.DATE, 
+    defaultValue: DataTypes.NOW 
   }
 }, {
+  tableName: 'invoices',
   timestamps: false
 });

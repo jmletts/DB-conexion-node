@@ -7,9 +7,9 @@ export const Order = sequelize.define("Order", {
     primaryKey: true, 
     autoIncrement: true 
   },
-  user_id: { 
-    type: DataTypes.INTEGER, 
-    allowNull: false 
+  cart_id: { 
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   order_number: { 
     type: DataTypes.STRING(50), 
@@ -36,17 +36,21 @@ export const Order = sequelize.define("Order", {
     type: DataTypes.DECIMAL(8, 2), 
     defaultValue: 0 
   },
-  payment_method_id: { 
-    type: DataTypes.INTEGER 
+  service_origin: { 
+    type: DataTypes.ENUM('OnePay', 'Website')
   },
-  shipping_method_id: { 
-    type: DataTypes.INTEGER 
+  shipping_address: { 
+    type: DataTypes.TEXT 
   },
-  shipping_address_id: { 
-    type: DataTypes.INTEGER 
+  billing_address: { 
+    type: DataTypes.TEXT 
   },
-  billing_address_id: { 
-    type: DataTypes.INTEGER 
+  payment_method: { 
+    type: DataTypes.STRING(50) 
+  },
+  payment_status: { 
+    type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed', 'refunded'), 
+    defaultValue: 'pending' 
   },
   notes: { 
     type: DataTypes.TEXT 
@@ -56,6 +60,7 @@ export const Order = sequelize.define("Order", {
     defaultValue: DataTypes.NOW 
   }
 }, {
+  tableName: 'orders',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at'

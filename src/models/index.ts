@@ -1,52 +1,81 @@
+// src/models/index.ts
 import sequelize from '../database/connection';
 
 // Importar todos los modelos
 import { User } from './user';
-import { Address } from './address';
-import { Category } from './category';
+import { Company } from './company';
 import { Product } from './product';
 import { ProductImage } from './productImage';
-import { PaymentMethod } from './paymentMethod';
-import { ShippingMethod } from './shippingMethod';
+import { Category } from './category';
+import { ProductCategory } from './productCategory';
+import { Customer } from './costumer';
+import { Cart } from './cart';
+import { CartItem } from './cartItem';
 import { Order } from './order';
 import { OrderItem } from './orderItem';
-import { CartItem } from './cartItem';
 import { Invoice } from './invoice';
-import { Staff } from './staff';
-import { SystemConfig } from './systemConfig';
+import { OnepayService } from './onepayService';
+import { WebsiteService } from './websiteService';
 
 // =============================================
 // DEFINIR RELACIONES
 // =============================================
 
-// Relaciones de Usuario
-User.hasMany(Address, { 
+// Relación Usuario - Compañía (1:1)
+User.hasOne(Company, { 
   foreignKey: 'user_id', 
-  as: 'addresses',
+  as: 'company',
   onDelete: 'CASCADE' 
 });
-Address.belongsTo(User, { 
+Company.belongsTo(User, { 
   foreignKey: 'user_id', 
   as: 'user' 
 });
 
-User.hasMany(Order, { 
-  foreignKey: 'user_id', 
-  as: 'orders' 
-});
-Order.belongsTo(User, { 
-  foreignKey: 'user_id', 
-  as: 'customer' 
-});
-
-User.hasMany(CartItem, { 
-  foreignKey: 'user_id', 
-  as: 'cartItems',
+// Relación Compañía - Productos (1:N)
+Company.hasMany(Product, { 
+  foreignKey: 'company_id', 
+  as: 'products',
   onDelete: 'CASCADE' 
 });
-CartItem.belongsTo(User, { 
-  foreignKey: 'user_id', 
-  as: 'user' 
+Product.belongsTo(Company, { 
+  foreignKey: 'company_id', 
+  as: 'company' 
+});
+
+// Relaciones de Producto con imágenes
+Product.hasMany(ProductImage, { 
+  foreignKey: 'product_id', 
+  as: 'images',
+  onDelete: 'CASCADE' 
+});
+ProductImage.belongsTo(Product, { 
+  foreignKey: 'product_id', 
+  as: 'product' 
+});
+
+// Relación Productos - Categorías (N:M) a través de ProductCategory
+Product.belongsToMany(Category, {
+  through: ProductCategory,
+  foreignKey: 'product_id',
+  otherKey: 'category_id',
+  as: 'categories'
+});
+Category.belongsToMany(Product, {
+  through: ProductCategory,
+  foreignKey: 'category_id',
+  otherKey: 'product_id',
+  as: 'products'
+});
+
+// Relación directa para ProductCategory
+ProductCategory.belongsTo(Product, { 
+  foreignKey: 'product_id', 
+  as: 'product' 
+});
+ProductCategory.belongsTo(Category, { 
+  foreignKey: 'category_id', 
+  as: 'category' 
 });
 
 // Relaciones de Categoría (auto-referencial para subcategorías)
@@ -59,46 +88,49 @@ Category.belongsTo(Category, {
   as: 'parent' 
 });
 
-Category.hasMany(Product, { 
-  foreignKey: 'category_id', 
-  as: 'products' 
-});
-Product.belongsTo(Category, { 
-  foreignKey: 'category_id', 
-  as: 'category' 
-});
-
-// Relaciones de Producto
-Product.hasMany(ProductImage, { 
-  foreignKey: 'product_id', 
-  as: 'images',
+// Relación Cliente - Carrito (1:N)
+Customer.hasMany(Cart, { 
+  foreignKey: 'customer_id', 
+  as: 'carts',
   onDelete: 'CASCADE' 
 });
-ProductImage.belongsTo(Product, { 
-  foreignKey: 'product_id', 
-  as: 'product' 
+Cart.belongsTo(Customer, { 
+  foreignKey: 'customer_id', 
+  as: 'customer' 
 });
 
-Product.hasMany(OrderItem, { 
-  foreignKey: 'product_id', 
-  as: 'orderItems' 
+// Relación Carrito - Items del Carrito (1:N)
+Cart.hasMany(CartItem, { 
+  foreignKey: 'cart_id', 
+  as: 'items',
+  onDelete: 'CASCADE' 
 });
-OrderItem.belongsTo(Product, { 
-  foreignKey: 'product_id', 
-  as: 'product' 
+CartItem.belongsTo(Cart, { 
+  foreignKey: 'cart_id', 
+  as: 'cart' 
 });
 
+// Relación Producto - Items del Carrito (1:N)
 Product.hasMany(CartItem, { 
   foreignKey: 'product_id', 
-  as: 'cartItems',
-  onDelete: 'CASCADE' 
+  as: 'cartItems' 
 });
 CartItem.belongsTo(Product, { 
   foreignKey: 'product_id', 
   as: 'product' 
 });
 
-// Relaciones de Pedido
+// Relación Carrito - Orden (1:1)
+Cart.hasOne(Order, { 
+  foreignKey: 'cart_id', 
+  as: 'order' 
+});
+Order.belongsTo(Cart, { 
+  foreignKey: 'cart_id', 
+  as: 'cart' 
+});
+
+// Relación Orden - Items de Orden (1:N)
 Order.hasMany(OrderItem, { 
   foreignKey: 'order_id', 
   as: 'items',
@@ -109,35 +141,17 @@ OrderItem.belongsTo(Order, {
   as: 'order' 
 });
 
-Order.belongsTo(PaymentMethod, { 
-  foreignKey: 'payment_method_id', 
-  as: 'paymentMethod' 
+// Relación Producto - Items de Orden (1:N)
+Product.hasMany(OrderItem, { 
+  foreignKey: 'product_id', 
+  as: 'orderItems' 
 });
-PaymentMethod.hasMany(Order, { 
-  foreignKey: 'payment_method_id', 
-  as: 'orders' 
-});
-
-Order.belongsTo(ShippingMethod, { 
-  foreignKey: 'shipping_method_id', 
-  as: 'shippingMethod' 
-});
-ShippingMethod.hasMany(Order, { 
-  foreignKey: 'shipping_method_id', 
-  as: 'orders' 
+OrderItem.belongsTo(Product, { 
+  foreignKey: 'product_id', 
+  as: 'product' 
 });
 
-// Relaciones de direcciones en pedidos
-Order.belongsTo(Address, { 
-  foreignKey: 'shipping_address_id', 
-  as: 'shippingAddress' 
-});
-Order.belongsTo(Address, { 
-  foreignKey: 'billing_address_id', 
-  as: 'billingAddress' 
-});
-
-// Relación de Factura
+// Relación Orden - Factura (1:1)
 Order.hasOne(Invoice, { 
   foreignKey: 'order_id', 
   as: 'invoice' 
@@ -147,20 +161,42 @@ Invoice.belongsTo(Order, {
   as: 'order' 
 });
 
+// Relación Compañía - Servicio OnePay (1:1)
+Company.hasOne(OnepayService, { 
+  foreignKey: 'company_id', 
+  as: 'onepayService',
+  onDelete: 'CASCADE' 
+});
+OnepayService.belongsTo(Company, { 
+  foreignKey: 'company_id', 
+  as: 'company' 
+});
+
+// Relación Compañía - Servicio Website (1:1)
+Company.hasOne(WebsiteService, { 
+  foreignKey: 'company_id', 
+  as: 'websiteService',
+  onDelete: 'CASCADE' 
+});
+WebsiteService.belongsTo(Company, { 
+  foreignKey: 'company_id', 
+  as: 'company' 
+});
 
 export {
   sequelize,
   User,
-  Address,
-  Category,
+  Company,
   Product,
   ProductImage,
-  PaymentMethod,
-  ShippingMethod,
+  Category,
+  ProductCategory,
+  Customer,
+  Cart,
+  CartItem,
   Order,
   OrderItem,
-  CartItem,
   Invoice,
-  Staff,
-  SystemConfig
+  OnepayService,
+  WebsiteService
 };

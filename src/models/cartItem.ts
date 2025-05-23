@@ -7,7 +7,7 @@ export const CartItem = sequelize.define("CartItem", {
     primaryKey: true, 
     autoIncrement: true 
   },
-  user_id: { 
+  cart_id: { 
     type: DataTypes.INTEGER, 
     allowNull: false 
   },
@@ -19,15 +19,22 @@ export const CartItem = sequelize.define("CartItem", {
     type: DataTypes.INTEGER, 
     allowNull: false, 
     defaultValue: 1 
+  },
+  unit_price: { 
+    type: DataTypes.DECIMAL(10, 2) 
+  },
+  total_price: { 
+    type: DataTypes.DECIMAL(10, 2) 
   }
 }, {
+  tableName: 'cart_items',
   timestamps: true,
   createdAt: 'added_at',
   updatedAt: false,
   indexes: [
     {
       unique: true,
-      fields: ['user_id', 'product_id']
+      fields: ['cart_id', 'product_id']
     }
   ]
 });
