@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const products_1 = require("../controllers/products");
+const company_1 = require("../controllers/company");
 const validateToken_1 = __importDefault(require("./validateToken"));
 const router = (0, express_1.Router)();
-router.post("/api/product/register", products_1.addProduct);
-router.get("/api/product/display", validateToken_1.default, products_1.getProducts);
+router.post("/api/company/add", company_1.addCompany);
+router.get("/api/company/display", validateToken_1.default, company_1.getMyCompany);
 exports.default = router;

@@ -12,6 +12,10 @@ exports.Product = connection_1.default.define("Product", {
         primaryKey: true,
         autoIncrement: true
     },
+    company_id: {
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: false
+    },
     name: {
         type: sequelize_1.DataTypes.STRING(200),
         allowNull: false
@@ -38,9 +42,6 @@ exports.Product = connection_1.default.define("Product", {
         type: sequelize_1.DataTypes.INTEGER,
         defaultValue: 5
     },
-    category_id: {
-        type: sequelize_1.DataTypes.INTEGER
-    },
     brand: {
         type: sequelize_1.DataTypes.STRING(100)
     },
@@ -55,6 +56,7 @@ exports.Product = connection_1.default.define("Product", {
         defaultValue: true
     }
 }, {
+    tableName: 'products',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'

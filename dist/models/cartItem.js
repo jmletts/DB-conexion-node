@@ -12,7 +12,7 @@ exports.CartItem = connection_1.default.define("CartItem", {
         primaryKey: true,
         autoIncrement: true
     },
-    user_id: {
+    cart_id: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false
     },
@@ -24,15 +24,22 @@ exports.CartItem = connection_1.default.define("CartItem", {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 1
+    },
+    unit_price: {
+        type: sequelize_1.DataTypes.DECIMAL(10, 2)
+    },
+    total_price: {
+        type: sequelize_1.DataTypes.DECIMAL(10, 2)
     }
 }, {
+    tableName: 'cart_items',
     timestamps: true,
     createdAt: 'added_at',
     updatedAt: false,
     indexes: [
         {
             unique: true,
-            fields: ['user_id', 'product_id']
+            fields: ['cart_id', 'product_id']
         }
     ]
 });

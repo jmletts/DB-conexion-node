@@ -29,6 +29,7 @@ exports.Category = connection_1.default.define("Category", {
         defaultValue: true
     }
 }, {
+    tableName: 'categories',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: false

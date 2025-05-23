@@ -6,7 +6,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductCategory = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../database/connection"));
-exports.ProductCategory = connection_1.default.define('Product_Category', {
-    Productid: { type: sequelize_1.DataTypes.INTEGER, primaryKey: true },
-    Categoryid: { type: sequelize_1.DataTypes.INTEGER, primaryKey: true }
+exports.ProductCategory = connection_1.default.define("ProductCategory", {
+    product_id: {
+        type: sequelize_1.DataTypes.INTEGER,
+        primaryKey: true
+    },
+    category_id: {
+        type: sequelize_1.DataTypes.INTEGER,
+        primaryKey: true
+    }
+}, {
+    tableName: 'product_categories',
+    timestamps: false
 });

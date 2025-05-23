@@ -12,7 +12,7 @@ exports.Order = connection_1.default.define("Order", {
         primaryKey: true,
         autoIncrement: true
     },
-    user_id: {
+    cart_id: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false
     },
@@ -41,17 +41,21 @@ exports.Order = connection_1.default.define("Order", {
         type: sequelize_1.DataTypes.DECIMAL(8, 2),
         defaultValue: 0
     },
-    payment_method_id: {
-        type: sequelize_1.DataTypes.INTEGER
+    service_origin: {
+        type: sequelize_1.DataTypes.ENUM('OnePay', 'Website')
     },
-    shipping_method_id: {
-        type: sequelize_1.DataTypes.INTEGER
+    shipping_address: {
+        type: sequelize_1.DataTypes.TEXT
     },
-    shipping_address_id: {
-        type: sequelize_1.DataTypes.INTEGER
+    billing_address: {
+        type: sequelize_1.DataTypes.TEXT
     },
-    billing_address_id: {
-        type: sequelize_1.DataTypes.INTEGER
+    payment_method: {
+        type: sequelize_1.DataTypes.STRING(50)
+    },
+    payment_status: {
+        type: sequelize_1.DataTypes.ENUM('pending', 'processing', 'completed', 'failed', 'refunded'),
+        defaultValue: 'pending'
     },
     notes: {
         type: sequelize_1.DataTypes.TEXT
@@ -61,6 +65,7 @@ exports.Order = connection_1.default.define("Order", {
         defaultValue: sequelize_1.DataTypes.NOW
     }
 }, {
+    tableName: 'orders',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'
