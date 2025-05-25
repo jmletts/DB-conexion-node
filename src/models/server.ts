@@ -1,9 +1,11 @@
+// src/models/server.ts (Actualizado)
 import express, { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import router from "../routes/user";
 import routerProducts from "../routes/products";
-import routerCompany from "../routes/company"; // 👈 Agregar esta línea
+import routerCompany from "../routes/company";
+import routerWebsite from "../routes/website";
 import * as models from "../models";
 
 class Server {
@@ -28,7 +30,7 @@ class Server {
   middlewares() {
     this.app.use(
       cors({
-        origin: "http://localhost:4200",
+        origin: ["http://localhost:4200", "http://localhost:3000"], // Agregué puerto 3000 para el frontend público
         credentials: true,
       })
     );
@@ -40,6 +42,7 @@ class Server {
     this.app.use(router);
     this.app.use(routerProducts);
     this.app.use(routerCompany);
+    this.app.use(routerWebsite); 
   }
 
   async dbConnection() {

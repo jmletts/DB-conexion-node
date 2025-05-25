@@ -45,12 +45,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// src/models/server.ts (Actualizado)
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const user_1 = __importDefault(require("../routes/user"));
 const products_1 = __importDefault(require("../routes/products"));
-const company_1 = __importDefault(require("../routes/company")); // 👈 Agregar esta línea
+const company_1 = __importDefault(require("../routes/company"));
+const website_1 = __importDefault(require("../routes/website"));
 const models = __importStar(require("../models"));
 class Server {
     constructor() {
@@ -68,7 +70,7 @@ class Server {
     }
     middlewares() {
         this.app.use((0, cors_1.default)({
-            origin: "http://localhost:4200",
+            origin: ["http://localhost:4200", "http://localhost:3000"], // Agregué puerto 3000 para el frontend público
             credentials: true,
         }));
         this.app.use((0, cookie_parser_1.default)());
@@ -78,6 +80,7 @@ class Server {
         this.app.use(user_1.default);
         this.app.use(products_1.default);
         this.app.use(company_1.default);
+        this.app.use(website_1.default);
     }
     dbConnection() {
         return __awaiter(this, void 0, void 0, function* () {
