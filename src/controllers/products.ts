@@ -2,12 +2,17 @@ import { Request, Response } from "express";
 import { Op } from "sequelize";
 import sequelize from "../database/connection";
 import { Product, Company, ProductImage, Category } from "../models";
+import { User as UserInterface } from "../interfaces/User";
+
+// Extender Request para incluir user
+interface AuthenticatedRequest extends Request {
+  user?: UserInterface;
+}
 
 // Crear producto
-export const addProduct = async (req: Request, res: Response): Promise<void> => {
+export const addProduct = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { 
-      company_id,
       name, 
       description, 
       price, 
@@ -21,18 +26,21 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
       is_active 
     } = req.body;
 
+    // Obtener user_id del token JWT
+    const user_id = req.user?.id;
+
     // Validaciones básicas
-    if (!company_id || !name || !price) {
+    if (!user_id || !name || !price) {
       res.status(400).json({ 
-        msg: "Los campos company_id, name y price son obligatorios" 
+        msg: "Los campos name y price son obligatorios" 
       });
       return;
     }
 
-    // Verificar que la compañía existe
-    const company = await Company.findByPk(company_id);
+    // Verificar que el usuario tiene una empresa
+    const company = await Company.findOne({ where: { user_id } });
     if (!company) {
-      res.status(404).json({ msg: "Compañía no encontrada" });
+      res.status(404).json({ msg: "No tienes una empresa registrada" });
       return;
     }
 
@@ -46,7 +54,7 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
     }
 
     const newProduct = await Product.create({
-      company_id,
+      company_id: (company as any).id,
       name,
       description,
       price,
@@ -74,7 +82,55 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-// Obtener todos los productos
+// Obtener productos del usuario autenticado
+export const getMyProducts = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const user_id = req.user?.id;
+
+    if (!user_id) {
+      res.status(401).json({ msg: "Usuario no autenticado" });
+      return;
+    }
+
+    // Verificar que el usuario tiene una empresa
+    const company = await Company.findOne({ where: { user_id } });
+    if (!company) {
+      res.status(404).json({ msg: "No tienes una empresa registrada" });
+      return;
+    }
+
+    const products = await Product.findAll({
+      where: { 
+        company_id: (company as any).id,
+        is_active: true 
+      },
+      include: [
+        {
+          model: Company,
+          as: 'company',
+          attributes: ['id', 'name']
+        },
+        {
+          model: ProductImage,
+          as: 'images',
+          attributes: ['id', 'image_url', 'alt_text', 'is_primary']
+        }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+
+    res.json({ products });
+
+  } catch (error: any) {
+    console.error("Error obteniendo productos:", error);
+    res.status(500).json({ 
+      msg: "Error obteniendo productos", 
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
+  }
+};
+
+// Obtener todos los productos (público)
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const products = await Product.findAll({
@@ -152,21 +208,40 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// Actualizar producto
-export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+// Actualizar producto del usuario autenticado
+export const updateMyProduct = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const user_id = req.user?.id;
+
+    if (!user_id) {
+      res.status(401).json({ msg: "Usuario no autenticado" });
+      return;
+    }
 
     if (!id || isNaN(Number(id))) {
       res.status(400).json({ msg: "ID de producto inválido" });
       return;
     }
 
-    const product = await Product.findByPk(id);
+    // Verificar que el usuario tiene una empresa
+    const company = await Company.findOne({ where: { user_id } });
+    if (!company) {
+      res.status(404).json({ msg: "No tienes una empresa registrada" });
+      return;
+    }
+
+    // Verificar que el producto pertenece a la empresa del usuario
+    const product = await Product.findOne({
+      where: { 
+        id: id,
+        company_id: (company as any).id 
+      }
+    });
     
     if (!product) {
-      res.status(404).json({ msg: "Producto no encontrado" });
+      res.status(404).json({ msg: "Producto no encontrado o no tienes permisos para editarlo" });
       return;
     }
 
@@ -217,20 +292,39 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-// Eliminar producto (soft delete)
-export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
+// Eliminar producto del usuario autenticado (soft delete)
+export const deleteMyProduct = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const user_id = req.user?.id;
+
+    if (!user_id) {
+      res.status(401).json({ msg: "Usuario no autenticado" });
+      return;
+    }
 
     if (!id || isNaN(Number(id))) {
       res.status(400).json({ msg: "ID de producto inválido" });
       return;
     }
 
-    const product = await Product.findByPk(id);
+    // Verificar que el usuario tiene una empresa
+    const company = await Company.findOne({ where: { user_id } });
+    if (!company) {
+      res.status(404).json({ msg: "No tienes una empresa registrada" });
+      return;
+    }
+
+    // Verificar que el producto pertenece a la empresa del usuario
+    const product = await Product.findOne({
+      where: { 
+        id: id,
+        company_id: (company as any).id 
+      }
+    });
     
     if (!product) {
-      res.status(404).json({ msg: "Producto no encontrado" });
+      res.status(404).json({ msg: "Producto no encontrado o no tienes permisos para eliminarlo" });
       return;
     }
 
@@ -248,7 +342,57 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-// Obtener productos con stock bajo
+// Obtener productos con stock bajo del usuario autenticado
+export const getMyLowStockProducts = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const user_id = req.user?.id;
+
+    if (!user_id) {
+      res.status(401).json({ msg: "Usuario no autenticado" });
+      return;
+    }
+
+    // Verificar que el usuario tiene una empresa
+    const company = await Company.findOne({ where: { user_id } });
+    if (!company) {
+      res.status(404).json({ msg: "No tienes una empresa registrada" });
+      return;
+    }
+
+    const lowStockProducts = await Product.findAll({
+      where: {
+        company_id: (company as any).id,
+        is_active: true,
+        [Op.or]: [
+          { stock: { [Op.lte]: sequelize.col('min_stock') } },
+          { stock: { [Op.eq]: 0 } }
+        ]
+      },
+      include: [
+        {
+          model: Company,
+          as: 'company',
+          attributes: ['id', 'name']
+        }
+      ],
+      order: [['stock', 'ASC']]
+    });
+
+    res.json({ 
+      products: lowStockProducts,
+      count: lowStockProducts.length 
+    });
+
+  } catch (error: any) {
+    console.error("Error obteniendo productos con stock bajo:", error);
+    res.status(500).json({ 
+      msg: "Error interno del servidor", 
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
+  }
+};
+
+// Obtener todos los productos con stock bajo (admin)
 export const getLowStockProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { company_id } = req.query;

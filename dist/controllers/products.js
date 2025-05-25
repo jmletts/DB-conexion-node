@@ -12,25 +12,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductsByCategory = exports.getLowStockProducts = exports.deleteProduct = exports.updateProduct = exports.getProductById = exports.getProducts = exports.addProduct = void 0;
+exports.getProductsByCategory = exports.getLowStockProducts = exports.getMyLowStockProducts = exports.deleteMyProduct = exports.updateMyProduct = exports.getProductById = exports.getProducts = exports.getMyProducts = exports.addProduct = void 0;
 const sequelize_1 = require("sequelize");
 const connection_1 = __importDefault(require("../database/connection"));
 const models_1 = require("../models");
 // Crear producto
 const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const { company_id, name, description, price, cost_price, sku, stock, min_stock, brand, weight, dimensions, is_active } = req.body;
+        const { name, description, price, cost_price, sku, stock, min_stock, brand, weight, dimensions, is_active } = req.body;
+        // Obtener user_id del token JWT
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         // Validaciones básicas
-        if (!company_id || !name || !price) {
+        if (!user_id || !name || !price) {
             res.status(400).json({
-                msg: "Los campos company_id, name y price son obligatorios"
+                msg: "Los campos name y price son obligatorios"
             });
             return;
         }
-        // Verificar que la compañía existe
-        const company = yield models_1.Company.findByPk(company_id);
+        // Verificar que el usuario tiene una empresa
+        const company = yield models_1.Company.findOne({ where: { user_id } });
         if (!company) {
-            res.status(404).json({ msg: "Compañía no encontrada" });
+            res.status(404).json({ msg: "No tienes una empresa registrada" });
             return;
         }
         // Verificar SKU único si se proporciona
@@ -42,7 +45,7 @@ const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             }
         }
         const newProduct = yield models_1.Product.create({
-            company_id,
+            company_id: company.id,
             name,
             description,
             price,
@@ -69,7 +72,52 @@ const addProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.addProduct = addProduct;
-// Obtener todos los productos
+// Obtener productos del usuario autenticado
+const getMyProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!user_id) {
+            res.status(401).json({ msg: "Usuario no autenticado" });
+            return;
+        }
+        // Verificar que el usuario tiene una empresa
+        const company = yield models_1.Company.findOne({ where: { user_id } });
+        if (!company) {
+            res.status(404).json({ msg: "No tienes una empresa registrada" });
+            return;
+        }
+        const products = yield models_1.Product.findAll({
+            where: {
+                company_id: company.id,
+                is_active: true
+            },
+            include: [
+                {
+                    model: models_1.Company,
+                    as: 'company',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: models_1.ProductImage,
+                    as: 'images',
+                    attributes: ['id', 'image_url', 'alt_text', 'is_primary']
+                }
+            ],
+            order: [['created_at', 'DESC']]
+        });
+        res.json({ products });
+    }
+    catch (error) {
+        console.error("Error obteniendo productos:", error);
+        res.status(500).json({
+            msg: "Error obteniendo productos",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+exports.getMyProducts = getMyProducts;
+// Obtener todos los productos (público)
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const products = yield models_1.Product.findAll({
@@ -142,18 +190,36 @@ const getProductById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getProductById = getProductById;
-// Actualizar producto
-const updateProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Actualizar producto del usuario autenticado
+const updateMyProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const { id } = req.params;
         const updateData = req.body;
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!user_id) {
+            res.status(401).json({ msg: "Usuario no autenticado" });
+            return;
+        }
         if (!id || isNaN(Number(id))) {
             res.status(400).json({ msg: "ID de producto inválido" });
             return;
         }
-        const product = yield models_1.Product.findByPk(id);
+        // Verificar que el usuario tiene una empresa
+        const company = yield models_1.Company.findOne({ where: { user_id } });
+        if (!company) {
+            res.status(404).json({ msg: "No tienes una empresa registrada" });
+            return;
+        }
+        // Verificar que el producto pertenece a la empresa del usuario
+        const product = yield models_1.Product.findOne({
+            where: {
+                id: id,
+                company_id: company.id
+            }
+        });
         if (!product) {
-            res.status(404).json({ msg: "Producto no encontrado" });
+            res.status(404).json({ msg: "Producto no encontrado o no tienes permisos para editarlo" });
             return;
         }
         // Verificar SKU único si se está actualizando
@@ -198,18 +264,36 @@ const updateProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
     }
 });
-exports.updateProduct = updateProduct;
-// Eliminar producto (soft delete)
-const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.updateMyProduct = updateMyProduct;
+// Eliminar producto del usuario autenticado (soft delete)
+const deleteMyProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const { id } = req.params;
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!user_id) {
+            res.status(401).json({ msg: "Usuario no autenticado" });
+            return;
+        }
         if (!id || isNaN(Number(id))) {
             res.status(400).json({ msg: "ID de producto inválido" });
             return;
         }
-        const product = yield models_1.Product.findByPk(id);
+        // Verificar que el usuario tiene una empresa
+        const company = yield models_1.Company.findOne({ where: { user_id } });
+        if (!company) {
+            res.status(404).json({ msg: "No tienes una empresa registrada" });
+            return;
+        }
+        // Verificar que el producto pertenece a la empresa del usuario
+        const product = yield models_1.Product.findOne({
+            where: {
+                id: id,
+                company_id: company.id
+            }
+        });
         if (!product) {
-            res.status(404).json({ msg: "Producto no encontrado" });
+            res.status(404).json({ msg: "Producto no encontrado o no tienes permisos para eliminarlo" });
             return;
         }
         // Soft delete - marcar como inactivo
@@ -224,8 +308,55 @@ const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
     }
 });
-exports.deleteProduct = deleteProduct;
-// Obtener productos con stock bajo
+exports.deleteMyProduct = deleteMyProduct;
+// Obtener productos con stock bajo del usuario autenticado
+const getMyLowStockProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!user_id) {
+            res.status(401).json({ msg: "Usuario no autenticado" });
+            return;
+        }
+        // Verificar que el usuario tiene una empresa
+        const company = yield models_1.Company.findOne({ where: { user_id } });
+        if (!company) {
+            res.status(404).json({ msg: "No tienes una empresa registrada" });
+            return;
+        }
+        const lowStockProducts = yield models_1.Product.findAll({
+            where: {
+                company_id: company.id,
+                is_active: true,
+                [sequelize_1.Op.or]: [
+                    { stock: { [sequelize_1.Op.lte]: connection_1.default.col('min_stock') } },
+                    { stock: { [sequelize_1.Op.eq]: 0 } }
+                ]
+            },
+            include: [
+                {
+                    model: models_1.Company,
+                    as: 'company',
+                    attributes: ['id', 'name']
+                }
+            ],
+            order: [['stock', 'ASC']]
+        });
+        res.json({
+            products: lowStockProducts,
+            count: lowStockProducts.length
+        });
+    }
+    catch (error) {
+        console.error("Error obteniendo productos con stock bajo:", error);
+        res.status(500).json({
+            msg: "Error interno del servidor",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+exports.getMyLowStockProducts = getMyLowStockProducts;
+// Obtener todos los productos con stock bajo (admin)
 const getLowStockProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { company_id } = req.query;

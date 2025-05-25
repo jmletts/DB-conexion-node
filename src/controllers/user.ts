@@ -79,3 +79,5 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   });
   res.json({ msg: "Login successfully and token sended", user, token }); // devuelv el token y el usuario
 };
+
+

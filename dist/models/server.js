@@ -55,7 +55,7 @@ const models = __importStar(require("../models"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
-        this.port = process.env.PORT || '3017';
+        this.port = process.env.PORT || "3017";
         this.middlewares();
         this.routes();
         this.dbConnection();
@@ -67,9 +67,12 @@ class Server {
         });
     }
     middlewares() {
-        this.app.use(express_1.default.json());
-        this.app.use((0, cors_1.default)());
+        this.app.use((0, cors_1.default)({
+            origin: "http://localhost:4200",
+            credentials: true,
+        }));
         this.app.use((0, cookie_parser_1.default)());
+        this.app.use(express_1.default.json());
     }
     routes() {
         this.app.use(user_1.default);
@@ -81,29 +84,30 @@ class Server {
             try {
                 // Probar conexión
                 yield models.sequelize.authenticate();
-                console.log('Database connection established.');
+                console.log("Database connection established.");
                 // OPCIÓN 1: Para desarrollo - Reset completo (CUIDADO: Elimina todos los datos)
-                if (process.env.NODE_ENV === 'development' && process.env.DB_RESET === 'true') {
+                if (process.env.NODE_ENV === "development" &&
+                    process.env.DB_RESET === "true") {
                     yield models.sequelize.drop(); // Elimina todas las tablas
-                    console.log('All tables dropped.');
+                    console.log("All tables dropped.");
                     yield models.sequelize.sync({
                     //force: true
                     }); // Crea todas las tablas nuevamente
-                    console.log('All tables created.');
+                    console.log("All tables created.");
                     yield models.sequelize.sync({
-                        force: true
+                        force: true,
                     });
                 }
                 // OPCIÓN 2: Para producción o desarrollo normal - Sync seguro
                 else {
                     yield models.sequelize.sync({
-                        alter: true
+                        alter: true,
                     });
-                    console.log('Database synchronized successfully.');
+                    console.log("Database synchronized successfully.");
                 }
             }
             catch (error) {
-                console.error('Unable to connect to the database:', error);
+                console.error("Unable to connect to the database:", error);
                 process.exit(1);
             }
         });
