@@ -6,6 +6,7 @@ import router from "../routes/user";
 import routerProducts from "../routes/products";
 import routerCompany from "../routes/company";
 import routerWebsite from "../routes/website";
+import routerCategory from "../routes/category";
 import * as models from "../models";
 
 class Server {
@@ -30,7 +31,7 @@ class Server {
   middlewares() {
     this.app.use(
       cors({
-        origin: ["http://localhost:4200", "http://localhost:3000"], // Agregué puerto 3000 para el frontend público
+        origin: ["http://localhost:4200", "http://localhost:49375"], // Agregué puerto 3000 para el frontend público
         credentials: true,
       })
     );
@@ -43,6 +44,7 @@ class Server {
     this.app.use(routerProducts);
     this.app.use(routerCompany);
     this.app.use(routerWebsite); 
+    this.app.use(routerCategory);
   }
 
   async dbConnection() {

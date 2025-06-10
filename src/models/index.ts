@@ -88,6 +88,9 @@ Category.belongsTo(Category, {
   as: 'parent' 
 });
 
+
+// relacion categoria compania
+Category.belongsTo(Company, { foreignKey: 'company_id', as: 'company' });
 // Relación Cliente - Carrito (1:N)
 Customer.hasMany(Cart, { 
   foreignKey: 'customer_id', 

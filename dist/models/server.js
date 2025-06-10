@@ -53,6 +53,7 @@ const user_1 = __importDefault(require("../routes/user"));
 const products_1 = __importDefault(require("../routes/products"));
 const company_1 = __importDefault(require("../routes/company"));
 const website_1 = __importDefault(require("../routes/website"));
+const category_1 = __importDefault(require("../routes/category"));
 const models = __importStar(require("../models"));
 class Server {
     constructor() {
@@ -70,7 +71,7 @@ class Server {
     }
     middlewares() {
         this.app.use((0, cors_1.default)({
-            origin: ["http://localhost:4200", "http://localhost:3000"], // Agregué puerto 3000 para el frontend público
+            origin: ["http://localhost:4200", "http://localhost:49375"], // Agregué puerto 3000 para el frontend público
             credentials: true,
         }));
         this.app.use((0, cookie_parser_1.default)());
@@ -81,6 +82,7 @@ class Server {
         this.app.use(products_1.default);
         this.app.use(company_1.default);
         this.app.use(website_1.default);
+        this.app.use(category_1.default);
     }
     dbConnection() {
         return __awaiter(this, void 0, void 0, function* () {
