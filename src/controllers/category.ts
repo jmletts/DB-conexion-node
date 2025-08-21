@@ -106,12 +106,13 @@ export const getCategories = async (
   }
 };
 
+//actualizar el update pero con is desde el rq body
 export const updateCategory = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;
     const updateData = req.body;
     const user_id = req.user?.id;
 
@@ -166,7 +167,7 @@ export const updateCategory = async (
           as: "Catgeory",
           attributes: ["id", "name", "description", "is_active"],
         },
-        {
+        { 
           model: Company,
           as: "company",
           attributes: ["id", "name"],
@@ -227,7 +228,8 @@ export const deleteCategory = async (
     }
 
     // Soft delete - marcar como inactivo
-    await category.update({ is_active: false });
+    //await category.update({ is_active: false });
+    await category.destroy();
 
     res.json({ msg: "categoria eliminado exitosamente" });
   } catch (error: any) {

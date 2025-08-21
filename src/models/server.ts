@@ -54,29 +54,14 @@ class Server {
       console.log("Database connection established.");
 
       // OPCIÓN 1: Para desarrollo - Reset completo (CUIDADO: Elimina todos los datos)
-      if (
-        process.env.NODE_ENV === "development" &&
-        process.env.DB_RESET === "true"
-      ) {
+
         await models.sequelize.drop(); // Elimina todas las tablas
         console.log("All tables dropped.");
 
         await models.sequelize.sync({
-          //force: true
-        }); // Crea todas las tablas nuevamente
-        console.log("All tables created.");
-
-        await models.sequelize.sync({
           force: true,
         });
-      }
       // OPCIÓN 2: Para producción o desarrollo normal - Sync seguro
-      else {
-        await models.sequelize.sync({
-          alter: true,
-        });
-        console.log("Database synchronized successfully.");
-      }
     } catch (error) {
       console.error("Unable to connect to the database:", error);
       process.exit(1);

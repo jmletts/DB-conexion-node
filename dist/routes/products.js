@@ -15,7 +15,7 @@ router.get("/api/products/low-stock", products_1.getLowStockProducts); // Stock 
 // Rutas protegidas (requieren autenticación)
 router.post("/api/product/add", validateToken_1.default, products_1.addProduct); // Crear producto
 router.get("/api/my-products", validateToken_1.default, products_1.getMyProducts); // Ver mis productos
-router.put("/api/product/:id", validateToken_1.default, products_1.updateMyProduct); // Actualizar mi producto
+router.put("/api/product/update", validateToken_1.default, products_1.updateMyProduct); // Actualizar mi producto
 router.delete("/api/product/:id", validateToken_1.default, products_1.deleteMyProduct); // Eliminar mi producto
 router.get("/api/my-products/low-stock", validateToken_1.default, products_1.getMyLowStockProducts); // Mi stock bajo
 exports.default = router;

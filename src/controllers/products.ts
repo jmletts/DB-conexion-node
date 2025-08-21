@@ -211,7 +211,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 // Actualizar producto del usuario autenticado
 export const updateMyProduct = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;
     const updateData = req.body;
     const user_id = req.user?.id;
 
@@ -291,6 +291,7 @@ export const updateMyProduct = async (req: AuthenticatedRequest, res: Response):
     });
   }
 };
+   
 
 // Eliminar producto del usuario autenticado (soft delete)
 export const deleteMyProduct = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

@@ -99,10 +99,11 @@ const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.getCategories = getCategories;
+//actualizar el update pero con is desde el rq body
 const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const { id } = req.params;
+        const { id } = req.body;
         const updateData = req.body;
         const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!user_id) {
@@ -201,7 +202,8 @@ const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return;
         }
         // Soft delete - marcar como inactivo
-        yield category.update({ is_active: false });
+        //await category.update({ is_active: false });
+        yield category.destroy();
         res.json({ msg: "categoria eliminado exitosamente" });
     }
     catch (error) {

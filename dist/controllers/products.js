@@ -194,7 +194,7 @@ exports.getProductById = getProductById;
 const updateMyProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const { id } = req.params;
+        const { id } = req.body;
         const updateData = req.body;
         const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!user_id) {

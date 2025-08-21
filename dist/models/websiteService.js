@@ -18,8 +18,7 @@ exports.WebsiteService = connection_1.default.define("WebsiteService", {
         allowNull: false
     },
     domain: {
-        type: sequelize_1.DataTypes.STRING(255),
-        unique: true
+        type: sequelize_1.DataTypes.STRING(255)
     },
     subdomain: {
         type: sequelize_1.DataTypes.STRING(100),

@@ -10,6 +10,6 @@ const router = (0, express_1.Router)();
 // Todas las rutas de company requieren autenticación
 router.post("/api/category/create", validateToken_1.default, category_1.createCategory);
 router.get("/api/category/display", validateToken_1.default, category_1.getCategories);
-router.put("/api/category/update/:id", validateToken_1.default, category_1.updateCategory);
+router.put("/api/category/update", validateToken_1.default, category_1.updateCategory);
 router.delete("/api/category/delete/:id", validateToken_1.default, category_1.deleteCategory);
 exports.default = router;

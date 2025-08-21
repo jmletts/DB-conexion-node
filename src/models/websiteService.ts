@@ -13,8 +13,7 @@ export const WebsiteService = sequelize.define("WebsiteService", {
     allowNull: false
   },
   domain: { 
-    type: DataTypes.STRING(255),
-    unique: true 
+    type: DataTypes.STRING(255)
   },
   subdomain: { 
     type: DataTypes.STRING(100),
