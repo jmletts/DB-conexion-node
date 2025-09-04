@@ -31,7 +31,7 @@ export const User = sequelize.define("User", {
     type: DataTypes.STRING(20) 
   },
   status: { 
-    type: DataTypes.ENUM('active', 'inactive', 'suspended'), 
+    type: DataTypes.ENUM('active', 'inactive', 'suspended', 'first_access'), 
     defaultValue: 'active' 
   }
 }, {

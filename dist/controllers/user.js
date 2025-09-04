@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.register = void 0;
+exports.updateUser = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = require("../models/user");
 const sequelize_1 = require("sequelize");
@@ -40,9 +40,20 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             email,
             password: passwordHash,
             phone,
-            status: "active",
+            status: "first_access", // seteamos el estado del usario en primer acceso
         });
-        res.json({ msg: "User created successfully", nUser }); // devuekve la confiamr dela andido
+        //funcione para seteat la cocokie
+        const firstUSer = yield user_1.User.findOne({
+            where: { email: email.trim() },
+        });
+        const token = jsonwebtoken_1.default.sign({
+            id: firstUSer === null || firstUSer === void 0 ? void 0 : firstUSer.id,
+            email: firstUSer === null || firstUSer === void 0 ? void 0 : firstUSer.email,
+            name: firstUSer === null || firstUSer === void 0 ? void 0 : firstUSer.name,
+            lastName: firstUSer === null || firstUSer === void 0 ? void 0 : firstUSer.lastName,
+        }, process.env.SECRET_KEY || "Jdzkfjdkjfk", { expiresIn: "1h" });
+        res.json({ msg: "User created successfully", user: nUser, token });
+        console.log(token);
     }
     catch (error) {
         res.status(500).json({ msg: "Error creating user", error });
@@ -55,7 +66,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_1.User.findOne({
         where: { email: email.trim() },
     });
-    3;
     if (!user) {
         res.status(400).json({ msg: "Email no existe", user });
         return;
@@ -77,6 +87,29 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         sameSite: "none", // Adjust as needed
         maxAge: 3600000, // 1 hour
     });
-    res.json({ msg: "Login successfully and token sended", user, token }); // devuelv el token y el usuario
+    res.json({ msg: "Login successfully and token sended", user, token,
+        "el usario fue creado ek": user.created_at,
+    }); // devuelv el token y el usuario
 });
 exports.login = login;
+const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id, name, lastName, email, phone, status } = req.body;
+    try {
+        const user = yield user_1.User.findByPk(id);
+        if (!user) {
+            res.status(404).json({ msg: "User not found" });
+            return;
+        }
+        user.name = name || user.name;
+        user.lastName = lastName || user.lastName;
+        user.email = email || user.email;
+        user.phone = phone || user.phone;
+        user.status = status || user.status;
+        yield user.save();
+        res.json({ msg: "User updated successfully", user });
+    }
+    catch (error) {
+        res.status(500).json({ msg: "Error updating user", error });
+    }
+});
+exports.updateUser = updateUser;

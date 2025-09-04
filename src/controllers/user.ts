@@ -11,7 +11,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     //creamos las vriabesl del tipo json
 
     //validaciones
-    const userUnique = await User.findOne({
+    const userUnique:any = await User.findOne({
       // funcion para verificar el usuairo unico
       where: { [Op.or]: [{ email: email }] }, //usamor op para validar ambos tanto encrdencia como email
     });
@@ -31,10 +31,30 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       email,
       password: passwordHash,
       phone,
-      status: "active",
+      status: "first_access", // seteamos el estado del usario en primer acceso
     });
 
-    res.json({ msg: "User created successfully", nUser }); // devuekve la confiamr dela andido
+
+    //funcione para seteat la cocokie
+
+    const firstUSer : any = await User.findOne({
+      where: { email: email.trim() },
+    });
+
+    const token = jwt.sign(
+      {
+        id: firstUSer?.id,
+        email: firstUSer?.email,
+        name: firstUSer?.name,
+        lastName: firstUSer?.lastName,
+      },
+      process.env.SECRET_KEY || "Jdzkfjdkjfk",
+      { expiresIn: "1h" }
+    );
+
+    res.json({ msg: "User created successfully", user: nUser , token});
+    console.log(token);
+    
   } catch (error) {
     res.status(500).json({ msg: "Error creating user", error });
     console.log(req.body);
@@ -47,7 +67,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const user: any = await User.findOne({
     where: { email: email.trim() },
   });
-  3;
+
   if (!user) {
     res.status(400).json({ msg: "Email no existe", user });
     return;
@@ -77,7 +97,58 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     sameSite: "none", // Adjust as needed
     maxAge: 3600000, // 1 hour
   });
-  res.json({ msg: "Login successfully and token sended", user, token }); // devuelv el token y el usuario
+  res.json({ msg: "Login successfully and token sended", user, token, 
+    "el usario fue creado ek": user.created_at,
+
+  }); // devuelv el token y el usuario
+
+
 };
+
+
+export const updateUser = async (req: Request, res: Response): Promise<void> => {
+  const { id, name, lastName, email, phone, status } = req.body;
+
+  try {
+    const user: any = await User.findByPk(id);
+
+    if (!user) {
+      res.status(404).json({ msg: "User not found" });
+      return;
+    }
+
+    user.name = name || user.name;
+    user.lastName = lastName || user.lastName;
+    user.email = email || user.email;
+    user.phone = phone || user.phone;
+    user.status = status || user.status;
+
+    await user.save();
+
+    res.json({ msg: "User updated successfully", user });
+  } catch (error) {
+    res.status(500).json({ msg: "Error updating user", error });
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

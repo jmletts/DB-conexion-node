@@ -36,7 +36,7 @@ exports.User = connection_1.default.define("User", {
         type: sequelize_1.DataTypes.STRING(20)
     },
     status: {
-        type: sequelize_1.DataTypes.ENUM('active', 'inactive', 'suspended'),
+        type: sequelize_1.DataTypes.ENUM('active', 'inactive', 'suspended', 'first_access'),
         defaultValue: 'active'
     }
 }, {
